@@ -7,7 +7,7 @@ import platform
 
 currentPlatform = platform.system()
 
-if currentPlatform is "Windows":
+if currentPlatform == "Windows":
 	dbLocation = "screenTime.db"
 else:
 	dbLocation = "/home/ubuntu/screenTime/screenTime.db"
@@ -43,10 +43,6 @@ time = str(time.tm_hour) + ":" + str(time.tm_min) + ":" + str(time.tm_sec)
 today = date.today()
 today = today.strftime("%d/%m/%Y")
 
-
-
-dbLocation = "asd"
-
 # Connecting to DB
 connection = sqlite3.connect(dbLocation)
 cursor = connection.cursor()
@@ -55,9 +51,13 @@ cursor = connection.cursor()
 
 # Adding Entry Time
 if(sys.argv[1] == 'start'):
-	toCheck = cursor.execute("SELECT * FROM EntryExitDetails ORDER BY ROWID DESC LIMIT 1").fetchall()[0][3]
-	cursor.execute("INSERT INTO EntryExitDetails VALUES(?,?,?,?)",(today,time,"0",0)) if toCheck != 0 else exit
-	
+	try:
+		toCheck = cursor.execute("SELECT exit_time FROM EntryExitDetails ORDER BY ROWID DESC LIMIT 1").fetchall()
+		toCheck = toCheck[0][0]
+		cursor.execute("INSERT INTO EntryExitDetails VALUES(?,?,?,?)",(today,time,"0",0)) if toCheck != 0 else exit
+	except:
+		cursor.execute("INSERT INTO EntryExitDetails VALUES(?,?,?,?)",(today,time,"0",0))
+
 
 # Adding Exit Time 
 if(sys.argv[1] == 'end'):
@@ -66,9 +66,11 @@ if(sys.argv[1] == 'end'):
 	seconds = differenceOfTime(start=startTime,end=time)
 	insertTime = cursor.execute("UPDATE EntryExitDetails SET exit_time = ? , diff = ? WHERE ROWID = ?",(time,seconds,rowID,))
 
-if(sys.argv[1] == 'howMuch'):
-	totalDuration = cursor.execute("SELECT SUM(diff) from EntryExitDetails WHERE date = ?",(today,)).fetchall()
-	print(totalDuration[0][0])
+if(sys.argv[1] == 'used'):
+	if(sys.srgv[2] == 'today'):
+		totalDuration = cursor.execute("SELECT SUM(diff) from EntryExitDetails WHERE date = ?",(today,)).fetchall()
+		print(totalDuration[0][0])
+
 
 rows = cursor.execute("SELECT * from EntryExitDetails").fetchall()
 print(rows[-1])

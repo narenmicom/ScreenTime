@@ -46,34 +46,38 @@ today = today.strftime("%d/%m/%Y")
 # Connecting to DB
 connection = sqlite3.connect(dbLocation)
 cursor = connection.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS EntryExitDetails(date TEXT, entry_time TEXT, exit_time TEXT, diff INTEGER)")
+cursor.execute("CREATE TABLE IF NOT EXISTS sessions(date TEXT, entry_time TEXT, exit_time TEXT, diff INTEGER)")
 cursor = connection.cursor()
 
 # Adding Entry Time
 if(sys.argv[1] == 'start'):
 	try:
-		toCheck = cursor.execute("SELECT exit_time FROM EntryExitDetails ORDER BY ROWID DESC LIMIT 1").fetchall()
-		toCheck = toCheck[0][0]
-		cursor.execute("INSERT INTO EntryExitDetails VALUES(?,?,?,?)",(today,time,"0",0)) if toCheck != 0 else exit
+		toCheck = cursor.execute("SELECT exit_time FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall()
+		toCheck = len(toCheck[0][0])
+		exit if toCheck == 1 else cursor.execute("INSERT INTO sessions VALUES(?,?,?,?)",(today,time,"0",0))
 	except:
-		cursor.execute("INSERT INTO EntryExitDetails VALUES(?,?,?,?)",(today,time,"0",0))
+		cursor.execute("INSERT INTO sessions VALUES(?,?,?,?)",(today,time,"0",0))
 
-
-# Adding Exit Time 
+# Adding Exit Time
 if(sys.argv[1] == 'end'):
-	rowID = cursor.execute("SELECT ROWID from EntryExitDetails WHERE date = ? ORDER BY ROWID DESC LIMIT 1",(today,)).fetchone()[0]
-	startTime = cursor.execute("SELECT entry_time from EntryExitDetails WHERE ROWID = ?",(rowID,)).fetchone()[0]
+	rowID = cursor.execute("SELECT ROWID from sessions WHERE date = ? ORDER BY ROWID DESC LIMIT 1",(today,)).fetchone()[0]
+	startTime = cursor.execute("SELECT entry_time from sessions WHERE ROWID = ?",(rowID,)).fetchone()[0]
 	seconds = differenceOfTime(start=startTime,end=time)
-	insertTime = cursor.execute("UPDATE EntryExitDetails SET exit_time = ? , diff = ? WHERE ROWID = ?",(time,seconds,rowID,))
+	insertTime = cursor.execute("UPDATE sessions SET exit_time = ? , diff = ? WHERE ROWID = ?",(time,seconds,rowID,))
 
 if(sys.argv[1] == 'used'):
-	if(sys.srgv[2] == 'today'):
-		totalDuration = cursor.execute("SELECT SUM(diff) from EntryExitDetails WHERE date = ?",(today,)).fetchall()
-		print(totalDuration[0][0])
+	if(sys.argv[2] == 'today'):
+		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(today,)).fetchall()
+		totalDuration = totalDuration[0][0]
+		print(secToHours(totalDuration))
+	if(sys.argv[2] == "on"):
+		date = sys.argv[3]
+		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(date,)).fetchall()
+		totalDuration = totalDuration[0][0]
+		print(secToHours(totalDuration))
 
 
-rows = cursor.execute("SELECT * from EntryExitDetails").fetchall()
-print(rows[-1])
+print(cursor.execute("SELECT * FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall())
 
 
 connection.commit()

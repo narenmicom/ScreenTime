@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import time
 import sys
 import sqlite3
@@ -74,7 +75,10 @@ if(sys.argv[1] == 'used'):
 		date = sys.argv[3]
 		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(date,)).fetchall()
 		totalDuration = totalDuration[0][0]
-		print(secToHours(totalDuration))
+		if totalDuration is not None:
+			print(secToHours(totalDuration))
+		else:
+			print("Date not present in Table or Invalid Date")
 
 
 print(cursor.execute("SELECT * FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall())

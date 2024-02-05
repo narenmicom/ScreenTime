@@ -34,11 +34,11 @@ def differenceOfTime(start,end):
 	seconds = difference.total_seconds()
 	return seconds 
 
-
+# If nothing is send as option or Help
 if(len(sys.argv) == 1 or sys.argv[1] == 'help'):
 	print("ScreenTime CLI")
 	print("     used today     -- To find the Screen Time for Today")
-	print('     used on "date" -- To find the Screen Time on that particular day')
+	print('     used on "date" -- To find the Screen Time on that particular date in Format (01/02/2024)')
 	exit()
 
 
@@ -66,6 +66,8 @@ if(sys.argv[1] == 'start'):
 	except:
 		cursor.execute("INSERT INTO sessions VALUES(?,?,?,?)",(today,time,"0",0))
 		connection.commit()
+	print(cursor.execute("SELECT * FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall())
+	print("Current Time : "+time)
 
 # Adding Exit Time
 if(sys.argv[1] == 'end'):
@@ -74,27 +76,28 @@ if(sys.argv[1] == 'end'):
 	seconds = differenceOfTime(start=startTime,end=time)
 	insertTime = cursor.execute("UPDATE sessions SET exit_time = ? , diff = ? WHERE ROWID = ?",(time,seconds,rowID,))
 	connection.commit()
+	print(cursor.execute("SELECT * FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall())
+	print("Current Time : "+time)
 
 if(sys.argv[1] == 'used'):
 	if(sys.argv[2] == 'today'):
 		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(today,)).fetchall()
 		totalDuration = totalDuration[0][0]
-		print(secToHours(totalDuration))
+		print("So for you have used the Device for " + secToHours(totalDuration)  + " today" )
 	if(sys.argv[2] == "on"):
 		date = sys.argv[3]
 		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(date,)).fetchall()
 		totalDuration = totalDuration[0][0]
 		if totalDuration is not None:
-			print(secToHours(totalDuration))
+			print("You have used the Device for " + secToHours(totalDuration)  + " on " + date )
 		else:
 			print("Date not present in Table or Invalid Date")
 
 
-print(cursor.execute("SELECT * FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall())
-
-
 connection.commit()
 
-print("Time : "+time)
+
+
+
 
 

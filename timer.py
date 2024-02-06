@@ -3,7 +3,7 @@ import time
 import sys
 import sqlite3
 from datetime import date
-from datetime import datetime 
+from datetime import datetime
 import platform
 
 currentPlatform = platform.system()
@@ -26,13 +26,15 @@ def secToHours(seconds):
 
 
 def differenceOfTime(start,end):
-	start = datetime.strptime(start, "%H:%M:%S") 
-	end = datetime.strptime(end, "%H:%M:%S") 
+	start = datetime.strptime(start, "%H:%M:%S")
+	end = datetime.strptime(end, "%H:%M:%S")
 
-	difference = end - start 
+	difference = end - start
 
 	seconds = difference.total_seconds()
-	return seconds 
+	return seconds
+
+
 
 # If nothing is send as option or Help
 if(len(sys.argv) == 1 or sys.argv[1] == 'help'):
@@ -80,10 +82,11 @@ if(sys.argv[1] == 'end'):
 	print("Current Time : "+time)
 
 if(sys.argv[1] == 'used'):
+
 	if(sys.argv[2] == 'today'):
 		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(today,)).fetchall()
 		totalDuration = totalDuration[0][0]
-		print("So for you have used the Device for " + secToHours(totalDuration)  + " today" )
+		print("So far you have used the Device for " + secToHours(totalDuration)  + " today" )
 	if(sys.argv[2] == "on"):
 		date = sys.argv[3]
 		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(date,)).fetchall()
@@ -94,7 +97,9 @@ if(sys.argv[1] == 'used'):
 			print("Date not present in Table or Invalid Date")
 
 
+
 connection.commit()
+
 
 
 

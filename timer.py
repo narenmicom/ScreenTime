@@ -4,6 +4,7 @@ import sys
 import sqlite3
 from datetime import date
 from datetime import datetime
+from datetime import timedelta
 import platform
 
 currentPlatform = platform.system()
@@ -39,8 +40,9 @@ def differenceOfTime(start,end):
 # If nothing is send as option or Help
 if(len(sys.argv) == 1 or sys.argv[1] == 'help'):
 	print("ScreenTime CLI")
-	print("     used today     -- To find the Screen Time for Today")
-	print('     used on "date" -- To find the Screen Time on that particular date in Format (01/02/2024)')
+	print("     used t / today         -- To find the Screen Time for Today")
+	print("     used y / yesterday     -- To find the Screen Time for Yesterday")
+	print('     used on "date"         -- To find the Screen Time on that particular date in Format (01/02/2024)')
 	exit()
 
 
@@ -82,11 +84,17 @@ if(sys.argv[1] == 'end'):
 	print("Current Time : "+time)
 
 if(sys.argv[1] == 'used'):
-
-	if(sys.argv[2] == 'today'):
+	if(sys.argv[2] == 'today' or sys.argv[2] == 't'):
 		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(today,)).fetchall()
 		totalDuration = totalDuration[0][0]
 		print("So far you have used the Device for " + secToHours(totalDuration)  + " today" )
+	if(sys.argv[2] == "yesterday" or sys.argv[2] == 'y'):
+		today = date.today()
+		today = today - timedelta(days = 1)
+		today = today.strftime("%d/%m/%Y")
+		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(today,)).fetchall()
+		totalDuration = totalDuration[0][0]
+		print("So far you have used the Device for " + secToHours(totalDuration)  + "  on Yesterday" )
 	if(sys.argv[2] == "on"):
 		date = sys.argv[3]
 		totalDuration = cursor.execute("SELECT SUM(diff) from sessions WHERE date = ?",(date,)).fetchall()

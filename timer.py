@@ -62,6 +62,8 @@ cursor = connection.cursor()
 
 # Adding Entry Time
 if(sys.argv[1] == 'start'):
+	lastUsed = cursor.execute("SELECT * FROM sessions ORDER BY ROWID DESC LIMIT 2").fetchall()[1]
+	print("Last time you have used the Laptop was on " + lastUsed[0] + " where the Screen Time is " + secToHours(lastUsed[3]))
 	try:
 		toCheck = cursor.execute("SELECT exit_time FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall()
 		toCheck = len(toCheck[0][0])
@@ -72,6 +74,7 @@ if(sys.argv[1] == 'start'):
 		connection.commit()
 	print(cursor.execute("SELECT * FROM sessions ORDER BY ROWID DESC LIMIT 1").fetchall())
 	print("Current Time : "+time)
+
 
 # Adding Exit Time
 if(sys.argv[1] == 'end'):
